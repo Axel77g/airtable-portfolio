@@ -5,6 +5,8 @@ import { AirtableResult } from "./AirtableResult";
 import { AbstractAirtableRepository } from "./AbstractAirtableRepository";
 import { z } from "zod";
 import { IProjectListRepository } from "../repositories/IProjectListRepository";
+import { FieldSet, Records } from "airtable";
+import { AirtableQueryPaginatedDecorator } from "./AirtableQueryPaginatedDecorator";
 
 const fieldSchema = z.object({
   slug: z.string(),
@@ -40,45 +42,46 @@ export class AirtableProjectsListingRepository
     withDraft: boolean;
     page: number;
     pageSize: number;
+    search?: string;
     cache?: boolean;
   }): Promise<PaginatedCollection<AirtableResult<ProjectListItem>>> {
-    const { withDraft, page, pageSize, cache } = query;
+    const { withDraft, page, pageSize, cache, search } = query;
     try {
-      const offset = (page - 1) * pageSize;
+      const conditions: string[] = [];
 
-      const totalQuery = this.getTable().select();
-      const totalRecords =
-        cache !== false
-          ? await this.executeQueryFromCache(totalQuery, "all")
-          : await totalQuery.all();
+      if (search) {
+        const safeSearch = this.escapeFilteringCharacters(search);
+        let subConditions: string[] = [
+          `FIND(LOWER('${safeSearch}'), LOWER({title}))`,
+          `FIND(LOWER('${safeSearch}'), LOWER({slug}))`,
+          `FIND(LOWER('${safeSearch}'), LOWER({content}))`,
+        ];
+        conditions.push(this.buildFilter(subConditions, "OR"));
+      }
 
-      const total = totalRecords.length;
-      const totalPages = Math.ceil(total / pageSize);
+      if (!withDraft) conditions.push(`published = TRUE()`);
 
       const query = this.getTable().select({
-        fields: ["slug", "title", "like", "date", "images", "published"], //scope to the used fields
-        filterByFormula: !withDraft ? `published = TRUE()` : "",
-        maxRecords: pageSize,
-        offset: offset,
+        fields: ["slug", "title", "like", "date", "images", "published"],
+        filterByFormula: this.buildFilter(conditions, "AND"),
+        pageSize,
       });
 
-      const records =
-        cache !== false
-          ? await this.executeQueryFromCache(query, "all")
-          : await query.all();
-
+      const decoratedQuery = new AirtableQueryPaginatedDecorator(query, page);
+      const [records, pagination] = await this.executeQueryFromCache(
+        decoratedQuery,
+        "paginate",
+      );
       const safeRecords = this.validateAll(records);
       const projects = safeRecords.map((record) =>
         this.convertToProjectListItem(record),
       );
       return {
         items: projects,
-        total,
         page,
         pageSize,
-        totalPages,
-        hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1,
+        hasNextPage: pagination.hasNext,
+        hasPreviousPage: pagination.hasPrev,
       };
     } catch (error) {
       console.error("Erreur lors de la récupération des projets:", error);

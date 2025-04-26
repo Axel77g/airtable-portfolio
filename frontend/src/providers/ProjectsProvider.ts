@@ -2,8 +2,7 @@ import {Provider} from "./Provider.ts";
 
 export class ProjectsProvider extends Provider {
 
-    getProjects(query :  Record<string, string>){
-        console.log(query)
+    getProjects(query :  Record<string, string> = {}){
         const queryUrl = new URLSearchParams(query).toString()
         return this.axios.get('/projects?' + queryUrl)
     }

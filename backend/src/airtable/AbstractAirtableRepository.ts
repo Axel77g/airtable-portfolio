@@ -1,7 +1,7 @@
 import { Base, FieldSet, Record, Records, Query } from "airtable";
 import { ZodType, z, ZodArray } from "zod";
 import * as crypto from "node:crypto";
-import { AirtableCache } from "./AirtableCache";
+import { AirtableCache, IAirtableQuery } from "./AirtableCache";
 export abstract class AbstractAirtableRepository<T extends ZodType> {
   /***
    * @param {Base} base - The airtable base injection
@@ -69,10 +69,25 @@ export abstract class AbstractAirtableRepository<T extends ZodType> {
     return value.replace(/[^a-zA-Z0-9-+@.]/g, "");
   }
 
-  protected executeQueryFromCache<Q extends Query<any>>(
+  protected executeQueryFromCache<Q extends IAirtableQuery>(
     query: Q,
     method: keyof Q,
   ) {
     return this.cache.executeQuery(query, method);
+  }
+
+  protected buildFilter(
+    conditions: string[] = [],
+    operator: "AND" | "OR" = "AND",
+  ) {
+    if (conditions.length === 0) return "";
+
+    const formatted = conditions.map((cond) => cond.trim()).filter(Boolean);
+
+    if (formatted.length === 1) {
+      return formatted[0];
+    }
+
+    return `${operator}(\n  ${formatted.join(",\n  ")}\n)`;
   }
 }

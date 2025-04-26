@@ -21,6 +21,8 @@ import {
 } from "../entities/Project";
 import { paginatedRequest } from "./requests/paginatedRequest";
 import { forceCacheRequest } from "./requests/forceCacheRequest";
+import { searchRequest } from "./requests/searchRequest";
+import { EventObserver } from "../events/EventObserver";
 
 declare module "express-session" {
   interface SessionData {
@@ -96,32 +98,36 @@ const projectListRepository = new AirtableProjectsListingRepository(base);
 
 app.get(
   "/projects",
-  makeController(async (req, res) => {
-    try {
-      const { page, pageSize, cache } = req.payload;
-      const projects = await projectListRepository.findAll({
-        page,
-        pageSize,
-        withDraft: isAuth(req),
-        cache: !isAuth(req) || Boolean(cache),
-      });
-      //add the liked status
-      (
-        projects as PaginatedCollection<
-          AirtableResult<ProjectWithLikedStatus<ProjectListItem>>
-        >
-      ).items = projects.items.map((project) => {
-        return {
-          ...project,
-          liked: hasLiked(project.slug, req),
-        };
-      });
-      res.json(projects);
-    } catch (e) {
-      console.error(e);
-      res.status(500).send("une erreur est survenue");
-    }
-  }, forceCacheRequest.merge(paginatedRequest)),
+  makeController(
+    async (req, res) => {
+      try {
+        const { page, pageSize, cache, s: search } = req.payload;
+        const projects = await projectListRepository.findAll({
+          page,
+          pageSize,
+          search,
+          withDraft: isAuth(req),
+          cache: !isAuth(req) || Boolean(cache),
+        });
+        //add the liked status
+        (
+          projects as PaginatedCollection<
+            AirtableResult<ProjectWithLikedStatus<ProjectListItem>>
+          >
+        ).items = projects.items.map((project) => {
+          return {
+            ...project,
+            liked: hasLiked(project.slug, req),
+          };
+        });
+        res.json(projects);
+      } catch (e) {
+        console.error(e);
+        res.status(500).send("une erreur est survenue");
+      }
+    },
+    forceCacheRequest.merge(paginatedRequest.merge(searchRequest)),
+  ),
 );
 
 app.get(
@@ -270,4 +276,19 @@ app.post(
       res.status(500).json({ message: "An error occurred during login" });
     }
   }, loginRequest),
+);
+
+app.post(
+  "/reset-cache",
+  authMiddleware,
+  makeController(async (req, res) => {
+    EventObserver.getInstance().emit({
+      type: "cache:clear",
+      data: null,
+    });
+
+    res.json({
+      message: "Cache cleared",
+    });
+  }),
 );

@@ -7,11 +7,12 @@ export function usePagination(pagination: {
     totalPages: number;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
-}) : [number, number, () => void, () => void]{
+}) : [number, number, () => void, () => void, (page: number) => void]{
 
     const [page, setPage] = useState(1)
 
     function nextPage(){
+        if(pagination?.hasNextPage === false) return console.warn('No more pages')
         setPage(page + 1)
     }
 
@@ -19,5 +20,5 @@ export function usePagination(pagination: {
         setPage(page - 1)
     }
 
-    return [page, pagination?.pageSize || 10, nextPage, previousPage]
+    return [page, pagination?.pageSize || 10, nextPage, previousPage,setPage]
 }

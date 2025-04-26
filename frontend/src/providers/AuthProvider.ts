@@ -8,4 +8,8 @@ export class AuthProvider extends Provider{
     getUser(){
         return this.axios.get('/user')
     }
+
+    resetCache(){
+        return this.axios.post('/reset-cache')
+    }
 }

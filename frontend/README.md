@@ -2,13 +2,29 @@
 
 Ce projet frontend est une application React qui sert d'interface utilisateur pour afficher et gérer un portfolio de projets. L'application utilise les technologies TypeScript, Framer Motion pour les animations, et communique avec un backend via des providers.
 
+### Stack
+- Typescript
+- React
+- Framer Motion
+- Tailwind
+- React Router
+
+## Instalation et lancement
+
+```bash
+ npm i && npm run dev
+```
+Lance un serveur de développement vite sur http://locahost:5173
+
+Le frontend est configuré pour utiliser le backend sur l'url http://locahost:3000 elle est modifiable dans le `.env`
+
 ## Caractéristiques principales
 
 - **Interface utilisateur interactive** avec animations fluides
 - **Système de providers** pour la communication avec l'API
 - **Authentification** pour l'accès à l'interface d'administration
 - **Gestion des projets** via une interface admin sécurisée
-- **Slider de projets** animé avec Framer Motion
+- **Slider de projets** animé avec Framer Motion + pagination et search incluse
 
 ## Architecture
 

@@ -1,90 +1,10 @@
-import React, { useState } from "react";
+import { useState} from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {Heart, Plus} from "lucide-react";
 import { cn } from "../lib/utils";
 import {useNavigate} from "react-router";
 import {TextAppear} from "./TextAppear.tsx";
-import {ProjectsProvider} from "../providers/ProjectsProvider.ts";
 
-const slides = [
-    {
-        slug: "mon-projet-super-cool",
-        published: true,
-        liked: false,
-        title: "Mon Projet Super Cool",
-        like: 128,
-        date: new Date("2025-04-20T14:30:00Z"),
-        content: "Voici une description fictive de mon projet, super engageante et pleine de détails.",
-        images: [
-            {
-                filename: "image1.jpg",
-                url: "/images/image_1.png",
-                thumbnails: {
-                    small: { url: "https://example.com/images/thumbs/small/image1.jpg" },
-                    large: { url: "https://example.com/images/thumbs/large/image1.jpg" },
-                    full: { url: "https://example.com/images/thumbs/full/image1.jpg" },
-                },
-            },
-            {
-                filename: "image2.jpg",
-                url: "https://example.com/images/image2.jpg",
-                thumbnails: {
-                    small: { url: "https://example.com/images/thumbs/small/image2.jpg" },
-                    large: { url: "https://example.com/images/thumbs/large/image2.jpg" },
-                    full: { url: "https://example.com/images/thumbs/full/image2.jpg" },
-                },
-            },
-        ],
-        image: {
-            filename: "image-principale.jpg",
-            url: "/images/image_1.png",
-            thumbnails: {
-                small: { url: "https://example.com/images/thumbs/small/image-principale.jpg" },
-                large: { url: "https://example.com/images/thumbs/large/image-principale.jpg" },
-                full: { url: "https://example.com/images/thumbs/full/image-principale.jpg" },
-            },
-        },
-    },
-    {
-        slug: "mon-projet-super-cool-2",
-        liked: true,
-        published: true,
-        title: "Mon Projet Super Cool 2",
-        like: 128,
-        date: new Date("2025-04-20T14:30:00Z"),
-        content: "Voici une description fictive de mon projet, super engageante et pleine de détails.",
-        images: [
-            {
-                filename: "image1.jpg",
-                url: "/images/image_2.png",
-                thumbnails: {
-                    small: { url: "https://example.com/images/thumbs/small/image1.jpg" },
-                    large: { url: "https://example.com/images/thumbs/large/image1.jpg" },
-                    full: { url: "https://example.com/images/thumbs/full/image1.jpg" },
-                },
-            },
-            {
-                filename: "image2.jpg",
-                url: "https://example.com/images/image2.jpg",
-                thumbnails: {
-                    small: { url: "https://example.com/images/thumbs/small/image2.jpg" },
-                    large: { url: "https://example.com/images/thumbs/large/image2.jpg" },
-                    full: { url: "https://example.com/images/thumbs/full/image2.jpg" },
-                },
-            },
-        ],
-        image: {
-            filename: "image-principale.jpg",
-            url: "/images/image_2.png",
-            thumbnails: {
-                small: { url: "https://example.com/images/thumbs/small/image-principale.jpg" },
-                large: { url: "https://example.com/images/thumbs/large/image-principale.jpg" },
-                full: { url: "https://example.com/images/thumbs/full/image-principale.jpg" },
-            },
-        },
-    }
-    // Add more slides as needed
-];
 
 const transition = {
     //inertia
@@ -109,27 +29,29 @@ const variants = {
     }),
 };
 
-export function Slider(props:{projects : any, handleToggleLike : (current : {slug: string, liked: boolean}) => void}) {
+export function Slider(props:{projects : any, handleToggleLike : (current : {slug: string, liked: boolean}) => void, onLast : () => void}) {
     const [[index, direction], setIndex] = useState([0, 0]);
     const {projects} = props;
     const paginate = (newDirection : number) => {
-        if(index + newDirection < 0) return
-        else setIndex([index + newDirection, newDirection]);
+        const newIndex = index + newDirection;
+        if(newIndex < 0) return
+        else setIndex([newIndex, newDirection]);
+        if(newIndex === projects.length - 1) props.onLast()
     };
 
     const navigation = useNavigate()
 
     const current = projects[index % projects.length]
 
-
     function handleSelect(){
         navigation(`/projects/${current.slug}`)
     }
 
 
+
     return (
         <div className="relative w-full h-[100%] overflow-hidden bg-black" onWheel={()=> handleSelect()}>
-            <AnimatePresence initial={false} custom={direction}>
+            {current && <AnimatePresence initial={false} custom={direction}>
                 <motion.div
                     key={index}
                     custom={direction}
@@ -150,7 +72,12 @@ export function Slider(props:{projects : any, handleToggleLike : (current : {slu
                     </TextAppear>
 
                 </motion.div>
-            </AnimatePresence>
+            </AnimatePresence>}
+            {!current && <div className="absolute w-full h-full flex items-center justify-center h-full">
+                <h1 className="text-white text-xl text-center whitespace-nowrap ">
+                    Aucun projet corespond a la recherche
+                </h1>
+            </div>}
             <div className="absolute top-0 left-0 w-1/4 h-full flex items-center pl-[15vw] z-10" onClick={() => paginate(-1)}>
                 <motion.div animate={{rotate: 90 * index}}>
                     <Plus size={32} strokeWidth={'1px'} className="text-white cursor-pointer" />
@@ -162,12 +89,14 @@ export function Slider(props:{projects : any, handleToggleLike : (current : {slu
                 </motion.div>
             </div>
 
-            <div  className="cursor-pointer absolute top-12 right-12 z-11" onClick={(e)=>e.preventDefault()}>
-                <Heart onClick={()=> props.handleToggleLike(current)} fill={current.liked ? 'white' : 'transparent'} size={32} strokeWidth={'1px'} className={'text-white'} />
-            </div>
+            {
+                current && <div  className="cursor-pointer absolute top-12 right-12 z-11" onClick={(e)=>e.preventDefault()}>
+                    <Heart onClick={()=> props.handleToggleLike(current)} fill={current.liked ? 'white' : 'transparent'} size={32} strokeWidth={'1px'} className={'text-white'} />
+                </div>
+            }
 
             <div className="absolute bottom-12 right-12 flex gap-4 z-10 select-none">
-                {projects.map((_, i) => (
+                {projects.map((_ : any,  i : number) => (
                     <div
                         key={i}
                         className={cn(

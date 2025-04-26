@@ -1,9 +1,7 @@
-export interface PaginatedCollection<T>{
-    items: T[];
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPreviousPage: boolean;
+export interface PaginatedCollection<T> {
+  items: T[];
+  page: number;
+  pageSize: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }

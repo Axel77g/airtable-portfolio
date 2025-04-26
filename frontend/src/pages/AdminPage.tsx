@@ -5,6 +5,7 @@ import {usePagination} from "../hook/usePagination.ts";
 import {Heart} from "lucide-react";
 import {Switch} from "../components/Switch.tsx";
 import {useEffect} from "react";
+import {AuthProvider} from "../providers/AuthProvider.ts";
 
 export function AdminPage() {
 
@@ -16,6 +17,12 @@ export function AdminPage() {
         const provider = new ProjectsProvider(axiosInstance)
         const response = await provider.setPublish(current.slug, current.published)
         if (response.status == 200) fetchProjects({page, pageSize, cache:0})
+    }
+
+    async function resetCacheServer(){
+        const provider = new AuthProvider(axiosInstance)
+        const response = await provider.resetCache()
+        if(response.status == 200) alert("Cache reloaded")
     }
 
     useEffect(() => {
@@ -41,7 +48,7 @@ export function AdminPage() {
                                 </span>
                                 <Switch
                                     checked={project.published}
-                                    onCheckedChange={(checked) => handleTogglePublish({ slug: project.slug, published: project.published })}
+                                    onCheckedChange={(_) => handleTogglePublish({ slug: project.slug, published: project.published })}
                                 />
                         </div>
                     </div>
@@ -52,6 +59,7 @@ export function AdminPage() {
                 <button onClick={()=> previousPage()} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Précédent</button>
                 <button onClick={()=> nextPage()} className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Suivant</button>
             </div>
+            <button onClick={()=> resetCacheServer()} className="px-4 py-2 bg-red-200 rounded hover:bg-red-300 text-red-900 cursor-pointer">Reset cache serveur</button>
         </div>
 );
 

@@ -1,6 +1,15 @@
-import { Query } from "airtable";
+import { Query, Record, Records } from "airtable";
 import * as crypto from "node:crypto";
 import { EventObserver } from "../events/EventObserver";
+
+export interface IAirtableQuery {
+  _table: any;
+  _params: any;
+  all(): Promise<Records<any>>;
+  eachPage(...args: any[]): Promise<any>;
+  firstPage(): Promise<Records<any>>;
+  paginate?(): Promise<any>;
+}
 
 class AirtableCacheEntry {
   public constructor(
@@ -14,6 +23,7 @@ class AirtableCacheEntry {
 }
 
 export class AirtableCache extends Map<string, AirtableCacheEntry> {
+  static MAX_CACHE_SIZE = 50;
   constructor() {
     super();
     EventObserver.getInstance().subscribe("cache:clear", this.clear.bind(this));
@@ -28,7 +38,7 @@ export class AirtableCache extends Map<string, AirtableCacheEntry> {
    * If a cached version of the query exists and is still valid,
    * it returns the cached result. Otherwise, it executes the query and stores the result in the cache.
    */
-  public executeQuery<Q extends Query<any>>(query: Q, method: keyof Q) {
+  public executeQuery<Q extends IAirtableQuery>(query: Q, method: keyof Q) {
     //Create a unique identifier for the given query using all the query parameters
     const queryFingerPrint = {
       table: query._table.name,
@@ -48,7 +58,8 @@ export class AirtableCache extends Map<string, AirtableCacheEntry> {
       }
     }
     //limit cache size prevent memory leak
-    if (this.size == 10) this.removeTheNextOutdatedEntry();
+    if (this.size == AirtableCache.MAX_CACHE_SIZE)
+      this.removeTheNextOutdatedEntry();
 
     //@ts-ignore
     const records = query[method]();
