@@ -1,4 +1,4 @@
-# Backend Portfolio Airtable
+"# Backend Portfolio Airtable
 Ce projet backend sert de serveur d'API pour une application de portfolio de projets, utilisant Airtable comme base de données. Il offre une architecture avec diverses fonctionnalités comme la mise en cache, l'authentification, et un pattern repository bien structuré.
 
 ### Stack
@@ -8,7 +8,7 @@ Ce projet backend sert de serveur d'API pour une application de portfolio de pro
 
 ## Instalation et lancement
 
-Créer un `.env` en suivant les variable a configurer dans `.env.example`
+Créer un `.env` en suivant les variables à configurer dans `.env.example`
 
 ```bash
  npm i && npm run dev
