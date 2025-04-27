@@ -16,7 +16,7 @@ Créer un `.env` en suivant les variables à configurer dans `.env.example`
 
 Lance un serveur express sur http://locahost:3000
 
-## Crée un compte utilisateur administrateur
+## Créer un compte utilisateur administrateur
 
 Pour créer un compte admin, utilisez la commande suivante :
 
