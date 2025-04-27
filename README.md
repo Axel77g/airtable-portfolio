@@ -1,5 +1,7 @@
 # Projet Portfolio Airtable
 
+> Exercice Airtable 5IW ESGI - Axel GODEFROY
+
 ## Informations Frontend
 
 Les informations concernant le frontend sont disponibles dans le fichier [`./frontend/README.md`](./frontend/README.md).
