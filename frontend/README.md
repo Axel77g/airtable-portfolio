@@ -19,7 +19,7 @@ Lance un serveur de développement vite sur http://locahost:5173
 Le frontend est configuré pour utiliser le backend sur l'url http://locahost:3000 elle est modifiable dans le `.env`
 
 
-## Routes disponible
+## Routes disponibles
 
 - Route `/` -> Home slider avec les projets
 - Route `/projects/:slug` -> Détail d'un projet
