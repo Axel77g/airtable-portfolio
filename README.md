@@ -1,6 +1,8 @@
 # Projet Portfolio Airtable
 
 > Exercice Airtable 5IW ESGI - Axel GODEFROY
+>
+> Lien partage airtable https://airtable.com/invite/l?inviteId=invV2KExY7tAv1etc&inviteToken=077e99ab84a43055a7867d36113beafe71d9872083ac88b8d27a5f06cb977e6d&utm_medium=email&utm_source=product_team&utm_content=transactional-alerts
 
 ## Informations Frontend
 
