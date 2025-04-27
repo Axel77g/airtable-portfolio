@@ -16,6 +16,16 @@ Créer un `.env` en suivant les variables à configurer dans `.env.example`
 
 Lance un serveur express sur http://locahost:3000
 
+## Crée un compte utilisateur administrateur
+
+Pour créer un compte admin, utilisez la commande suivante :
+
+```bash
+npm run hash:password -- VOTRE_PASSWORD
+```
+
+Copiez le mot de passe hashé et créez votre utilisateur avec l'email et le password dans la table `users` d'Airtable.
+
 ## Architecture
 
 Le backend est construit sur Node.js avec Express et TypeScript, organisé selon les principes suivants:
