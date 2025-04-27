@@ -12,6 +12,14 @@ Les informations concernant le frontend sont disponibles dans le fichier [`./fro
 
 Les informations concernant le backend sont disponibles dans le fichier [`./backend/README.md`](./backend/README.md).
 
+## Lancement rapide
+
+Une fois les deux sous-répertoires configurés,
+lancement du back et du front en même temps.
+```bash
+npm run dev
+```
+
 ## Fonctionnalités Clés
 
 - Mise en cache des requêtes Airtable
