@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { z, ZodObject, ZodType } from "zod";
 
+/**
+ * A TypeScript type that extends the express `Request` interface to include a `payload` property.
+ * This is typically used in contexts where a request is expected to carry additional
+ * validated data, with the structure defined by a `ZodType` schema.*
+ */
 export type RequestWithPayload<T extends ZodType | undefined> = Request & {
   payload: T extends ZodType ? z.infer<T> : null;
 };
@@ -12,6 +17,13 @@ export type ControllerHandler<T extends ZodType | undefined> = (
 
 export type ExpressHandler = (req: Request, res: Response) => void;
 
+/**
+ * A utility function for creating an Express route handler
+ * with optional validation and error handling logic.
+ *
+ * It transform the express Request to an RequestWithPayload by adding safe parsed payload
+ * It return a valid express RequestHandler
+ */
 export const makeController = <T extends ZodType>(
   handler: ControllerHandler<T>,
   schema?: T | undefined,

@@ -81,7 +81,7 @@ Il fonctionne de paire avec le systeme de caching vu précédement
 1. **Objectif**
 
 - Contourne les limitations de la librairie Airtable pour la pagination (manque me champs offset de l'api avec les methodes de base `all()` `firstPage()`, `eachPage()` non applicable)
-- Implémente l'interface pour la compatibilité avec le cache `IAirtableQuery`
+- Implémente l'interface pour la compatibilité avec le cache `IAirtableCacheableQuery`
 
 2. **Fonctionnalités clés**
 

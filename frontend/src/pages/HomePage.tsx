@@ -1,4 +1,4 @@
-import Slider from "../components/slider.tsx";
+import Slider from "../components/Slider.tsx";
 import {useEffect, useRef, useState} from "react";
 import {axiosInstance} from "../providers/axiosInstance.ts";
 import {ProjectsProvider} from "../providers/ProjectsProvider.ts";

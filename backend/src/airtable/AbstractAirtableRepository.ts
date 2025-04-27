@@ -1,7 +1,7 @@
 import { Base, FieldSet, Record, Records, Query } from "airtable";
 import { ZodType, z, ZodArray } from "zod";
-import * as crypto from "node:crypto";
-import { AirtableCache, IAirtableQuery } from "./AirtableCache";
+import { AirtableCache } from "./AirtableCache/AirtableCache";
+import { IAirtableCacheableQuery } from "./AirtableCache/IAirtableCacheableQuery";
 export abstract class AbstractAirtableRepository<T extends ZodType> {
   /***
    * @param {Base} base - The airtable base injection
@@ -65,17 +65,26 @@ export abstract class AbstractAirtableRepository<T extends ZodType> {
     return this.getArraySchema().parse(records);
   }
 
+  /**
+   * Escapes special characters from the input string to ensure only valid filtering characters remain.
+   */
   protected escapeFilteringCharacters(value: string) {
     return value.replace(/[^a-zA-Z0-9-+@.]/g, "");
   }
 
-  protected executeQueryFromCache<Q extends IAirtableQuery>(
+  /**
+   * Executes a query using the cache mechanism by invoking the specified method on the provided query object.
+   */
+  protected executeQueryFromCache<Q extends IAirtableCacheableQuery>(
     query: Q,
     method: keyof Q,
   ) {
     return this.cache.executeQuery(query, method);
   }
 
+  /**
+   * Constructs an airtable filter string by combining multiple conditions with a logical operator.
+   */
   protected buildFilter(
     conditions: string[] = [],
     operator: "AND" | "OR" = "AND",

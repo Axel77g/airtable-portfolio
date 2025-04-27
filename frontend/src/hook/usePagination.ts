@@ -1,5 +1,8 @@
 import {useState} from "react";
 
+/**
+ * Custom hook to handle pagination logic.
+ */
 export function usePagination(pagination: {
     total: number;
     page: number;

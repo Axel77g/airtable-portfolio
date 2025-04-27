@@ -92,9 +92,5 @@ code {
 
 html,
 body {
-    /*@apply bg-white dark:bg-gray-950;*/
     color-scheme: light;
-    /*@media (prefers-color-scheme: dark) {*/
-    /*    color-scheme: dark;*/
-    /*}*/
 }

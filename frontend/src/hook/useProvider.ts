@@ -3,6 +3,10 @@ import {Axios} from "axios";
 import {axiosInstance} from "../providers/axiosInstance.ts";
 import {useState} from "react";
 
+/**
+ * A custom hook that simplifies the interaction with a provider class,
+ * allowing execution of methods and managing its loading and result states.
+ */
 export function useProvider<T extends Provider>(provider: new (axios: Axios) => T
     , method : keyof T, defaultValue : any, defaultValueLoading : boolean = false){
 

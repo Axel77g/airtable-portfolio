@@ -1,32 +1,21 @@
-import { Query, Record, Records } from "airtable";
 import * as crypto from "node:crypto";
-import { EventObserver } from "../events/EventObserver";
+import { EventObserver } from "../../events/EventObserver";
+import { AirtableCacheEntry } from "./AirtableCacheEntry";
+import { IAirtableCacheableQuery } from "./IAirtableCacheableQuery";
+import { EVENT_CLEAR_CACHE } from "../../events/ClearCacheEvent";
 
-export interface IAirtableQuery {
-  _table: any;
-  _params: any;
-  all(): Promise<Records<any>>;
-  eachPage(...args: any[]): Promise<any>;
-  firstPage(): Promise<Records<any>>;
-  paginate?(): Promise<any>;
-}
-
-class AirtableCacheEntry {
-  public constructor(
-    public readonly records: any,
-    public readonly date: Date = new Date(),
-  ) {}
-
-  isOutdated() {
-    return new Date().getTime() - this.date.getTime() > 1000 * 60 * 30;
-  }
-}
-
+/**
+ * A cache implementation extending the Map class designed to store and manage Airtable query results.
+ * This cache is used to optimize repeated queries by saving their results and reducing redundant requests.
+ */
 export class AirtableCache extends Map<string, AirtableCacheEntry> {
   static MAX_CACHE_SIZE = 50;
   constructor() {
     super();
-    EventObserver.getInstance().subscribe("cache:clear", this.clear.bind(this));
+    EventObserver.getInstance().subscribe(
+      EVENT_CLEAR_CACHE,
+      this.clear.bind(this),
+    );
   }
 
   public isCacheDisabled() {
@@ -36,15 +25,20 @@ export class AirtableCache extends Map<string, AirtableCacheEntry> {
   /**
    * Executes a query by checking the cache for the result.
    * If a cached version of the query exists and is still valid,
-   * it returns the cached result. Otherwise, it executes the query and stores the result in the cache.
+   * it returns the cached result.
+   * Otherwise, it executes the query and stores the result in the cache.
    */
-  public executeQuery<Q extends IAirtableQuery>(query: Q, method: keyof Q) {
+  public executeQuery<Q extends IAirtableCacheableQuery>(
+    query: Q,
+    method: keyof Q,
+  ) {
     //Create a unique identifier for the given query using all the query parameters
     const queryFingerPrint = {
       table: query._table.name,
       method,
       ...query._params,
     };
+    //Create a hash of the query finger print
     const hash = crypto
       .createHash("sha256")
       .update(JSON.stringify(queryFingerPrint))

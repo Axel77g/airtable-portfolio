@@ -23,6 +23,9 @@ import { paginatedRequest } from "./requests/paginatedRequest";
 import { forceCacheRequest } from "./requests/forceCacheRequest";
 import { searchRequest } from "./requests/searchRequest";
 import { EventObserver } from "../events/EventObserver";
+import { isAuth } from "./utils/isAuth";
+import { hasLiked } from "./utils/hasLiked";
+import { ClearCacheEvent } from "../events/ClearCacheEvent";
 
 declare module "express-session" {
   interface SessionData {
@@ -33,7 +36,6 @@ declare module "express-session" {
 
 const apiKey = process.env.AIRTABLE_API_KEY;
 const baseId = process.env.AIRTABLE_BASE_ID;
-
 const secret = process.env.APP_SECRET || "secret";
 
 if (!apiKey || !baseId)
@@ -43,18 +45,28 @@ if (!apiKey || !baseId)
 
 export const app = express();
 const base = new Airtable({ apiKey }).base(baseId);
+const projectRepository = new AirtableProjectRepository(base);
+const projectListRepository = new AirtableProjectsListingRepository(base);
+const userRepository = new AirtableUserRepository(base);
+
+/**
+ * --- MIDLEWARES ---
+ */
 
 app.use(express.json());
 
 app.use(
   cors({
-    //allow all
-    origin: "http://localhost:5173",
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
   }),
 );
 
+/**
+ * Represents a file-based session storage system for managing user sessions.
+ * Use for the like system and the authentification
+ */
 const FileStore = fileStore(session);
 app.use(
   session({
@@ -82,20 +94,11 @@ function authMiddleware(
   }
 }
 
-function isAuth(req: express.Request) {
-  return req.session.user !== undefined;
-}
-
-function hasLiked(slug: string, req: express.Request) {
-  if (!req.session.likedProjects) return false;
-  if (!req.session.likedProjects.includes(slug)) return false;
-  return true;
-}
+/**
+ *  --- ROUTES ---
+ */
 
 // ProjectPage Routes
-const projectRepository = new AirtableProjectRepository(base);
-const projectListRepository = new AirtableProjectsListingRepository(base);
-
 app.get(
   "/projects",
   makeController(
@@ -238,8 +241,6 @@ app.post(
 
 // Auth Routes
 
-const userRepository = new AirtableUserRepository(base);
-
 app.get(
   "/user",
   authMiddleware,
@@ -282,10 +283,7 @@ app.post(
   "/reset-cache",
   authMiddleware,
   makeController(async (req, res) => {
-    EventObserver.getInstance().emit({
-      type: "cache:clear",
-      data: null,
-    });
+    EventObserver.getInstance().emit(ClearCacheEvent);
 
     res.json({
       message: "Cache cleared",

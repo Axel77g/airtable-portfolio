@@ -1,11 +1,9 @@
-import { Project, ProjectListItem } from "../entities/Project";
-import { IProjectRepository } from "../repositories/IProjectRepository";
+import { ProjectListItem } from "../entities/Project";
 import { PaginatedCollection } from "../types/PaginatedCollection";
 import { AirtableResult } from "./AirtableResult";
 import { AbstractAirtableRepository } from "./AbstractAirtableRepository";
 import { z } from "zod";
 import { IProjectListRepository } from "../repositories/IProjectListRepository";
-import { FieldSet, Records } from "airtable";
 import { AirtableQueryPaginatedDecorator } from "./AirtableQueryPaginatedDecorator";
 
 const fieldSchema = z.object({

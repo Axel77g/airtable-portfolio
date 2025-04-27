@@ -1,10 +1,10 @@
-import { Project, ProjectListItem } from "../entities/Project";
+import { Project } from "../entities/Project";
 import { IProjectRepository } from "../repositories/IProjectRepository";
-import { PaginatedCollection } from "../types/PaginatedCollection";
 import { AirtableResult } from "./AirtableResult";
 import { AbstractAirtableRepository } from "./AbstractAirtableRepository";
 import { z } from "zod";
 import { EventObserver } from "../events/EventObserver";
+import { ClearCacheEvent } from "../events/ClearCacheEvent";
 
 const fieldSchema = z.object({
   slug: z.string(),
@@ -118,10 +118,7 @@ export class AirtableProjectRepository
       });
 
       //invalidate the app caches
-      EventObserver.getInstance().emit({
-        type: "cache:clear",
-        data: null,
-      });
+      EventObserver.getInstance().emit(ClearCacheEvent);
 
       return this.convertToProject(this.validate(updatedRecord));
     } catch (error) {

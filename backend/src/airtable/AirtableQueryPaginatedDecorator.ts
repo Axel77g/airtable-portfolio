@@ -1,6 +1,7 @@
 import { Query, Records } from "airtable";
 import axios from "axios";
-import { IAirtableQuery } from "./AirtableCache";
+
+import { IAirtableCacheableQuery } from "./AirtableCache/IAirtableCacheableQuery";
 
 /**
  * Décorateur pour la gestion de la mise en cache d'une requete paginé airtable
@@ -8,10 +9,11 @@ import { IAirtableQuery } from "./AirtableCache";
  * Cette classe implémente une solution de contournement pour mettre en cache les query paginé de airtable
  * La librairie airtable ne fournit pas directement l'offset de pagination.
  * Avec ce decorateur on vient améliorer la query de base en ajoutant une methode paginate qui fait le call directement
- * Implemente IAirtableQuery qui est utilisé dans le systeme de mise en cache.
+ * Implemente IAirtableCacheableQuery qui est utilisé dans le systeme de mise en cache.
  **/
-
-export class AirtableQueryPaginatedDecorator implements IAirtableQuery {
+export class AirtableQueryPaginatedDecorator
+  implements IAirtableCacheableQuery
+{
   private axiosInstance = axios.create({
     baseURL: "https://api.airtable.com/v0",
     headers: {
@@ -39,6 +41,11 @@ export class AirtableQueryPaginatedDecorator implements IAirtableQuery {
     };
   }
 
+  /**
+   * Fetches and paginates records based on the provided query parameters.
+   * It navigates through multiple pages of data until the current page is reached,
+   * returning the records and pagination metadata (indicating if there are previous or next pages).
+   */
   async paginate(): Promise<
     [Records<any>, { hasNext: boolean; hasPrev: boolean }]
   > {
@@ -87,15 +94,24 @@ export class AirtableQueryPaginatedDecorator implements IAirtableQuery {
     ];
   }
 
+  /**
+   * Call the base decorated object's method
+   */
   all() {
     return this.query.all();
   }
 
+  /**
+   * Call the base decorated object's method
+   */
   eachPage(...args: any[]) {
     //@ts-ignore
     return this.query.eachPage(...args);
   }
 
+  /**
+   * Call the base decorated object's method
+   */
   firstPage() {
     return this.query.firstPage();
   }

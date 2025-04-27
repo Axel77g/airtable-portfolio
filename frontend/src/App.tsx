@@ -33,6 +33,11 @@ function PrivateRoutes() {
 
 }
 
+/**
+ * A wrapper component for handling page transitions based on the current route path.
+ * It determines if the current path matches the provided path and adjusts the layout accordingly.
+ * It simulate a fake ReactRouter to handle animation between pagination
+ */
 function PageWrapper(props : {children : JSX.Element,path: string}){
     const isMatch = (path: string, pathname: string) => {
         const pathParts = path.split('/');
@@ -58,7 +63,7 @@ function PageWrapper(props : {children : JSX.Element,path: string}){
 function App() {
     const location = useLocation()
     const hidePortfolio = location.pathname.split('/').pop() === 'admin' || location.pathname.split('/').pop() === 'login'
-  return <div>
+    return <div>
       <Routes location={location} >
           <Route element={<PrivateRoutes/>}>
             <Route path="/admin" element={<AdminPage/>} />
@@ -66,7 +71,7 @@ function App() {
           <Route path="/login" element={<LoginPage/>} />
       </Routes>
       {!hidePortfolio && <AnimatedRoutes/>}
-  </div>
+    </div>
 }
 
 export default App

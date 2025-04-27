@@ -1,0 +1,10 @@
+{
+  "name": "airtable-portfolio",
+  "version": "1.0.0",
+  "description": "Airtable portfolio",
+  "scripts": {
+    "start": "(cd frontend && npm run dev) & (cd backend && npm run dev)"
+  },
+  "author": "Axel G",
+  "license": "ISC"
+}
