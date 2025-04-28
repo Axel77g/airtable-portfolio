@@ -34,9 +34,12 @@ export function HomePage(){
 
         const newProjects = resultsRequest?.items?.filter((p : any) => p.published) || []
         let temp = [
+            ...newProjects,
             ...projects,
-            ...newProjects
         ]
+
+        const unique = new Set(temp.map(item => item.slug))
+        temp = [...unique].map(slug => temp.find(item => item.slug === slug))
         // @ts-ignore
         setProjects(temp)
     }, [resultsRequest]);
