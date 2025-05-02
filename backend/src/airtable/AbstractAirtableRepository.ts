@@ -53,7 +53,9 @@ export abstract class AbstractAirtableRepository<T extends ZodType> {
   protected validate(
     record: Record<FieldSet>,
   ): z.infer<ReturnType<typeof this.getRecordSchema>> {
-    return this.getRecordSchema().parse(record);
+    const result = this.getRecordSchema().safeParse(record)
+    if(!result.success) throw new Error(`Airtable record validation error: ${result.error}`)
+    return result.data;
   }
 
   /**
@@ -62,7 +64,9 @@ export abstract class AbstractAirtableRepository<T extends ZodType> {
   protected validateAll(
     records: Records<FieldSet>,
   ): z.infer<ReturnType<typeof this.getRecordSchema>>[] {
-    return this.getArraySchema().parse(records);
+    const result = this.getArraySchema().safeParse(records)
+    if(!result.success) throw new Error(`Airtable record validation error: ${result.error}`)
+    return result.data;
   }
 
   /**

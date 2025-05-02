@@ -30,6 +30,7 @@ export const makeController = <T extends ZodType>(
   onError?: (res: Response) => void,
 ): ExpressHandler => {
   return (req: Request, res: Response) => {
+    console.log(`[${req.method}] ${req.path}`); 
     if (schema) {
       const payload = schema.safeParse({
         ...req.query,
@@ -46,7 +47,11 @@ export const makeController = <T extends ZodType>(
     } else {
       (req as RequestWithPayload<typeof schema>).payload = null;
     }
-
-    return handler(req as RequestWithPayload<T>, res);
+    try{
+      return handler(req as RequestWithPayload<T>, res);
+    }catch (e) {
+      console.error(e)
+      return res.status(500).send("Internal server error");
+    }
   };
 };

@@ -5,6 +5,18 @@ import { AbstractAirtableRepository } from "./AbstractAirtableRepository";
 import { z } from "zod";
 import { EventObserver } from "../events/EventObserver";
 import { ClearCacheEvent } from "../events/ClearCacheEvent";
+import { lookupKeyToObjectNested } from "./utils/lookupKeyToObjectNested";
+
+const imageSchema = z.object({
+    id: z.string(),
+    width: z.number(),
+    height: z.number(),
+    url: z.string(),
+    filename: z.string(),
+    size : z.number(),
+    type: z.string(),
+    thumbnails: z.any(),
+})
 
 const fieldSchema = z.object({
   slug: z.string(),
@@ -22,8 +34,15 @@ const fieldSchema = z.object({
     z.date(),
   ]),
   content: z.string(),
-  images: z.array(z.any()),
+  images: z.array(z.any()).optional(),
   image: z.any(),
+  technologies: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      logo: imageSchema,
+    }),
+  ),
 });
 
 export class AirtableProjectRepository
@@ -62,6 +81,8 @@ export class AirtableProjectRepository
 
       if (records.length === 0) return null;
 
+      records[0].fields = lookupKeyToObjectNested(records[0].fields);
+      console.log(records[0].fields);
       return this.convertToProject(this.validate(records[0]));
     } catch (error) {
       console.error(
@@ -94,6 +115,8 @@ export class AirtableProjectRepository
         like: currentLikes + (dislike ? -1 : 1),
       });
 
+      updatedRecord.fields = lookupKeyToObjectNested(updatedRecord.fields);
+
       return this.convertToProject(this.validate(updatedRecord));
     } catch (error) {
       console.error(`Erreur lors du like du projet avec slug ${slug}:`, error);
@@ -116,6 +139,8 @@ export class AirtableProjectRepository
       const updatedRecord = await this.getTable().update(project._airtableId, {
         published: value,
       });
+
+      updatedRecord.fields = lookupKeyToObjectNested(updatedRecord.fields);
 
       //invalidate the app caches
       EventObserver.getInstance().emit(ClearCacheEvent);
@@ -142,8 +167,11 @@ export class AirtableProjectRepository
       like: fields.like || 0,
       date: new Date(fields.date || Date.now()),
       content: fields.content || "",
-      images: fields.images,
+      // @ts-ignore
+      images: fields?.images || [],
       image: fields.image,
+      // @ts-ignore
+      technologies : fields.technologies
     };
   }
 }

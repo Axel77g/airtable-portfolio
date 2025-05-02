@@ -69,12 +69,24 @@ export default function ProjectPage() {
                                      </span>
                                     </TextAppear>
                                 </div>
+                                <div className="text-zinc-400 text-sm">
+                                    <TextAppear delay={1} delayExit={0} >
+                                     {
+                                        project.technologies.map((tech : {name:string, logo:{url:string}}) => (
+                                            <span key={tech.name} className="flex gap-4 items-center mb-4">
+                                                <img src={tech.logo.url} alt={tech.name} className="w-6 h-6"/>
+                                                {tech.name}
+                                            </span>
+                                        ))
+                                     }
+                                    </TextAppear>
+                                </div>
 
                                 <motion.div
                                     initial={{opacity: 0}}
                                     animate={{opacity: 1, transition: {delay: 1.2, duration: 1} }}
                                     exit={{opacity: 0, transition: {delay: 0, duration: 0.3} }}
-                                    className="prose prose-invert markdown-content max-w-none text-zinc-100 mt-12"
+                                    className="prose prose-invert markdown-content max-w-none text-zinc-100 mt-4"
                                 >
                                     <ReactMarkdown>
                                         {project.content}
